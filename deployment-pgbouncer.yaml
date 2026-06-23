@@ -87,7 +87,7 @@ spec:
               memory: "256Mi"
             limits:
               cpu: "1"
-              memory: "1200Mi"
+              memory: "1000Mi"
           startupProbe:
             tcpSocket:
               port: 5432
