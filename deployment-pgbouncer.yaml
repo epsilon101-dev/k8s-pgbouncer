@@ -76,7 +76,7 @@ spec:
               cpu: "250m"
               memory: "256Mi"
             limits:
-              cpu: "2"
+              cpu: "1"
               memory: "1200Mi"
           securityContext:
             readOnlyRootFilesystem: true
