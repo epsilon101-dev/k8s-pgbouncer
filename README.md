@@ -64,7 +64,14 @@ To compile PgBouncer 1.25.2 from source inside a Debian Bookworm multi-stage bui
 ```bash
 docker build --no-cache --platform linux/amd64 -t asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgbouncer:v2 .
 docker push asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgbouncer:v2
+
+# Get the immutable SHA-256 digest of the pushed image
+docker inspect --format='{{index .RepoDigests 0}}' asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgbouncer:v2
 ```
+
+> [!TIP]
+> **Production Best Practice (Immutable Image Digests):**
+> For production environments, reference the image in `deployment-pgbouncer.yaml` by its immutable SHA-256 digest (e.g., `pgbouncer@sha256:abc123yoursha...`) rather than a mutable tag like `:v2`. This ensures that Kubernetes always pulls the exact verified container binary.
 
 ### 2. Configure GCP Secret Manager (gcloud)
 
@@ -179,11 +186,7 @@ With **4 application users**, a `default_pool_size` of **40**, and **2 replicas*
    ```
 2. **Leave Headroom:** Ensure the calculated maximum connections from PgBouncer are safely below your database's `max_connections`, leaving a margin (e.g., 20-30 connections) for direct administrator or analytics tool logins.
 3. **Adjust Config:** Tune `default_pool_size` in `external-secret-pgbouncer.yaml` accordingly before applying updates.
-4. **Use Immutable Image Digests (Production):** Avoid mutable tags like `:v2` in production because they can be overwritten with different binaries. Instead, retrieve the image's SHA-256 digest after pushing it:
-   ```bash
-   docker inspect --format='{{index .RepoDigests 0}}' asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgbouncer:v2
-   ```
-   And reference it in `deployment-pgbouncer.yaml` using `@sha256:digest` syntax (e.g., `pgbouncer@sha256:abc123...`).
+4. **Use Immutable Image Digests (Production):** Pin the container image by its SHA-256 digest (e.g., `pgbouncer@sha256:abc123yoursha...`) instead of mutable tags in `deployment-pgbouncer.yaml` to ensure reproducibility (see Step 1 for details).
 
 ---
 

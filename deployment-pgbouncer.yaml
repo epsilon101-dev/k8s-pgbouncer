@@ -66,8 +66,10 @@ spec:
                 topologyKey: kubernetes.io/hostname
       containers:
         - name: pgbouncer
-          image: asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgbouncer:v2
-          imagePullPolicy: Always
+          # Use immutable image digest in production (e.g., pgbouncer@sha256:abc123yourdigest...)
+          # to ensure predictability and prevent tag overwriting.
+          image: asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgbouncer@sha256:your-pushed-image-sha256-digest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
               name: pgbouncer
