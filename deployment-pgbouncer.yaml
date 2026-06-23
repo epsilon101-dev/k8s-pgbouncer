@@ -40,7 +40,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 200
       nodeSelector:
-        env-pool: production-pool
+        env-pool: production-pool # replace with gke pool node label
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
