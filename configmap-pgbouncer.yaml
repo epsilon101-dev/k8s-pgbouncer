@@ -18,7 +18,7 @@ data:
     # Auth
     auth_type = scram-sha-256
     auth_file = /etc/pgbouncer-auth/userlist.txt
-    admin_users = prod_backend_hades_abc
+    admin_users = 
     stats_users =
 
     # Pooling
