@@ -64,6 +64,8 @@ spec:
         fsGroup: 70
         seccompProfile:
           type: RuntimeDefault
+        appArmorProfile:
+          type: RuntimeDefault
       containers:
         - name: pgbouncer
           # Use immutable image digest in production (e.g., pgbouncer@sha256:abc123yourdigest...)
