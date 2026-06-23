@@ -72,11 +72,11 @@ docker push asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgboun
 > **Production Password Security (SCRAM-SHA-256 Hashing):**
 > Storing raw plaintext passwords in Kubernetes Secrets is a security risk. Because this deployment configures `auth_type = scram-sha-256` in PgBouncer, you should store the pre-calculated PostgreSQL **SCRAM verifiers** (hashes) in GCP Secret Manager instead of raw plaintext passwords.
 > 
-> To retrieve the SCRAM verifier for your database user, run this query in your PostgreSQL database:
+> To retrieve the SCRAM verifier for each database user, run this query in your PostgreSQL database:
 > ```sql
-> SELECT passwd FROM pg_shadow WHERE usename = 'prod_backend_hades_user';
+> SELECT usename, passwd FROM pg_shadow WHERE usename IN ('prod_backend_hades_user', 'prod_backend_hades_abc');
 > ```
-> This returns a string like `SCRAM-SHA-256$4096:base64salt$base64ClientKey:base64ServerKey`. Use this hashed verifier as the value for `db_password` in your Secret Manager JSON payload.
+> This returns the SCRAM verifiers (hashed strings starting with `SCRAM-SHA-256$...`) unique to each user. Save these verifiers under `db_password_user` and `db_password_abc` in your Secret Manager JSON payload.
 
 Create the Google Service Account (GSA), download the database server CA certificate, construct the JSON payload, and create the secret:
 
@@ -98,7 +98,8 @@ python3 -c '
 import json
 ca_cert = open("server-ca.pem").read()
 payload = {
-    "db_password": "your-db-scram-verifier",
+    "db_password_user": "your-db-scram-verifier-for-user",
+    "db_password_abc": "your-db-scram-verifier-for-abc",
     "server_ca": ca_cert
 }
 with open("pgbouncer_secrets_payload.json", "w") as f:
