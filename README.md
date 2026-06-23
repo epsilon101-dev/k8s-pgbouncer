@@ -46,8 +46,9 @@ This deployment is built for high reliability and follows strict enterprise secu
 - **Node Anti-Affinity:** Utilizes a soft `podAntiAffinity` spread rule (`topologyKey: kubernetes.io/hostname`) to prioritize distributing PgBouncer pods across separate GKE nodes, preventing a single hardware failure from causing a outage.
 - **Graceful Shutdown:** Configured with a `preStop` lifecycle hook sleep period of 180s, allowing active client queries to finish processing and GKE endpoints to propagate before termination.
 
-### 🐳 Parameterized Docker Builds
-- **Docker Build Arguments:** The `Dockerfile` compiles PgBouncer from source using `ARG PGBOUNCER_VERSION=1.25.2`. This decouples the compilation process, making base image updates and version bumps clean and modular.
+### 🐳 Parameterized & Secure Docker Builds
+- **Docker Build Arguments:** The `Dockerfile` compiles PgBouncer from source using `ARG PGBOUNCER_VERSION=1.25.2` and `ARG PGBOUNCER_SHA256`. This decouples the compilation process, making base image updates and version bumps clean and modular.
+- **Source Integrity Verification:** Enforces security at build-time by verifying the SHA-256 checksum of the downloaded PgBouncer source tarball (`sha256sum -c -`) before configuring and compiling. This prevents compilation of compromised or corrupted packages.
 
 ---
 
