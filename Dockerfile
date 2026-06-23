@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     libevent-2.1-7 \
     libssl3 \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -r -g 70 pgbouncer \
     && useradd -r -u 70 -g pgbouncer -d /var/lib/pgbouncer -s /sbin/nologin pgbouncer \
