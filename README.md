@@ -47,7 +47,7 @@ This deployment is built for high reliability and follows strict enterprise secu
 - **Graceful Shutdown:** Configured with a `preStop` lifecycle hook sleep period of 180s, allowing active client queries to finish processing and GKE endpoints to propagate before termination.
 
 ### 🐳 Parameterized & Secure Docker Builds
-- **Docker Build Arguments:** The `Dockerfile` compiles PgBouncer from source using `ARG PGBOUNCER_VERSION=1.25.2` and `ARG PGBOUNCER_SHA256`. This decouples the compilation process, making base image updates and version bumps clean and modular.
+- **Docker Build Arguments:** The `Dockerfile` compiles PgBouncer from source using `ARG PGBOUNCER_VERSION=1.25.2` and `ARG PGBOUNCER_SHA256`. This decouples the compilation process, making base image updates and version bumps clean and modular. Version details can be tracked in the official [PgBouncer Changelog](https://www.pgbouncer.org/changelog.html).
 - **Source Integrity Verification:** Enforces security at build-time by verifying the SHA-256 checksum of the downloaded PgBouncer source tarball (`sha256sum -c -`) before configuring and compiling. This prevents compilation of compromised or corrupted packages.
 
 ---
@@ -205,3 +205,9 @@ kubectl exec -it -n prod-hades deployment/pgbouncer -- kill -HUP 1
 
 This will trigger PgBouncer to re-read the configuration files from disk and apply the changes in memory instantly, without dropping any active client connections.
 
+---
+
+## References
+
+- [Official PgBouncer Changelog](https://www.pgbouncer.org/changelog.html)
+- [Official PgBouncer Downloads](https://www.pgbouncer.org/downloads/)
