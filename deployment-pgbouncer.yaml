@@ -41,13 +41,6 @@ spec:
       terminationGracePeriodSeconds: 200
       nodeSelector:
         env-pool: production-pool
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 70
-        runAsGroup: 70
-        fsGroup: 70
-        seccompProfile:
-          type: RuntimeDefault
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -64,6 +57,13 @@ spec:
                       values:
                         - prod
                 topologyKey: kubernetes.io/hostname
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: pgbouncer
           # Use immutable image digest in production (e.g., pgbouncer@sha256:abc123yourdigest...)
@@ -73,6 +73,12 @@ spec:
           ports:
             - containerPort: 5432
               name: pgbouncer
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           resources:
             requests:
               cpu: "250m"
@@ -80,12 +86,6 @@ spec:
             limits:
               cpu: "1"
               memory: "1200Mi"
-          securityContext:
-            readOnlyRootFilesystem: true
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
           startupProbe:
             tcpSocket:
               port: 5432
