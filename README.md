@@ -9,9 +9,9 @@ The following diagram illustrates how credentials flow securely from Google Clou
 ```mermaid
 graph LR
     App["🚀 Application Pods"] -->|Port 5432| PB["🔒 PgBouncer (2 Replicas)"]
-    PB -->|TLS (verify-ca)| SQL["🗄️ Cloud SQL PostgreSQL"]
+    PB -->|TLS verify-ca| SQL["🗄️ Cloud SQL PostgreSQL"]
 
-    PB -.->|Mounts Config & Certs| Sec["🔑 K8s Secrets"]
+    PB -.->|Mounts Config and Certs| Sec["🔑 K8s Secrets"]
     ESO["⚙️ External Secrets Operator"] -->|Auto-Sync| Sec
     ESO -->|Fetches| GSM["🛡️ GCP Secret Manager"]
 ```
@@ -52,6 +52,9 @@ This deployment is built for high reliability and follows strict enterprise secu
 
 
 ## Build and Deploy
+
+> [!TIP]
+> In a production environment, configuring and provisioning GCP infrastructure (Secret Manager, IAM Service Accounts, GKE Service Accounts, and IAM bindings) should be automated using **Terraform** or a similar Infrastructure-as-Code (IaC) tool. For simplicity in this tutorial, we use `gcloud` CLI commands.
 
 ### 1. Build and Push Docker Image (v2)
 
