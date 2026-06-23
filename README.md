@@ -89,7 +89,6 @@ ca_cert = open("server-ca.pem").read()
 payload = {
     "db_ip": "10.100.1.5",
     "db_password": "your-db-password",
-    "admin_password": "your-admin-password",
     "server_ca": ca_cert
 }
 with open("pgbouncer_secrets_payload.json", "w") as f:
@@ -182,17 +181,12 @@ With **4 application users**, a `default_pool_size` of **40**, and **2 replicas*
 ### Reloading configuration without downtime
 Since we mount the Secrets directly (without using `subPath`), Kubernetes automatically updates the mounted files inside the container when the Secret Manager payload updates.
 
-To apply changes to `pgbouncer.ini` or `userlist.txt` without restarting the pod:
-
-1. Update and apply the GCP Secret Manager secret version.
-2. Run a SIGHUP command on the container process, or connect to the PgBouncer administrative console and run `RELOAD`:
+To apply changes to `pgbouncer.ini` or `userlist.txt` dynamically without any downtime or restarting the pods, run a SIGHUP command on the container process:
 
 ```bash
-# Option A: Send SIGHUP signal to the pgbouncer process
+# Send SIGHUP signal to the pgbouncer process
 kubectl exec -it -n prod-hades deployment/pgbouncer -- kill -HUP 1
-
-# Option B: Connect to administrative console and reload
-psql -h pgbouncer -p 5432 -U postgres pgbouncer
-# (Enter the postgres admin password set in userlist.txt)
-pgbouncer=# RELOAD;
 ```
+
+This will trigger PgBouncer to re-read the configuration files from disk and apply the changes in memory instantly, without dropping any active client connections.
+
