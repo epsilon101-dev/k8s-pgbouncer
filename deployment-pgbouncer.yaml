@@ -3,7 +3,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: pgbouncer-pdb
-  namespace: prod
+  namespace: prod-hades
   labels:
     app: pgbouncer
     env: prod
@@ -18,7 +18,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pgbouncer
-  namespace: prod
+  namespace: prod-hades
 spec:
   replicas: 2
   revisionHistoryLimit: 6
@@ -39,6 +39,8 @@ spec:
         env: prod
     spec:
       terminationGracePeriodSeconds: 200
+      nodeSelector:
+        env-pool: production-pool
       securityContext:
         runAsNonRoot: true
         runAsUser: 70
@@ -64,7 +66,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
       containers:
         - name: pgbouncer
-          image: asia.gcr.io/zeus-007/zeus-pgbouncer:v2
+          image: asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgbouncer:v2
           imagePullPolicy: Always
           ports:
             - containerPort: 5432
@@ -118,8 +120,8 @@ spec:
               mountPath: /var/run/pgbouncer
       volumes:
         - name: config-volume
-          configMap:
-            name: pgbouncer
+          secret:
+            secretName: pgbouncer-config
         - name: secret-volume
           secret:
             secretName: pgbouncer-secret
@@ -134,7 +136,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: pgbouncer
-  namespace: prod
+  namespace: prod-hades
   labels:
     app: pgbouncer
     env: prod

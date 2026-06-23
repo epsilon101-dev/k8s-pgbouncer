@@ -19,8 +19,8 @@ RUN curl -fsSL "https://www.pgbouncer.org/downloads/files/${PGBOUNCER_VERSION}/p
     --prefix=/usr/local \
     --with-openssl \
     --disable-debug \
-    && make -j"$(nproc)" \
-    && make install
+    && make pgbouncer \
+    && cp pgbouncer /usr/local/bin/pgbouncer
 
 # ── Runtime stage ──────────────────────────────────────────────
 FROM debian:bookworm-slim
