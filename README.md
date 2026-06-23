@@ -7,60 +7,13 @@ A hardened, highly-available, and modernized PgBouncer deployment for GKE utiliz
 The following diagram illustrates how credentials flow securely from Google Cloud Secret Manager into GKE, and how clients connect to Cloud SQL through PgBouncer:
 
 ```mermaid
-graph TD
-    subgraph GCP ["Google Cloud Platform"]
-        SM["GCP Secret Manager<br>(prod-pgbouncer-secrets)"]
-        SQL["Cloud SQL (PostgreSQL)<br>(10.100.1.5:5432)"]
-    end
+graph LR
+    App["🚀 Application Pods"] -->|Port 5432| PB["🔒 PgBouncer (2 Replicas)"]
+    PB -->|TLS (verify-ca)| SQL["🗄️ Cloud SQL PostgreSQL"]
 
-    subgraph GKE ["GKE Cluster (Namespace: prod-hades)"]
-        subgraph Security ["Security & Identity"]
-            KSA["Kubernetes Service Account<br>(prod-pgbouncer-sa)"]
-            GSA["Google Service Account<br>(prod-pgbouncer-gsa)"]
-            KSA -. "Workload Identity Binding" .-> GSA
-            GSA -. "IAM Secret Accessor" .-> SM
-        end
-
-        subgraph ESO ["External Secrets Operator (ESO)"]
-            SS["SecretStore<br>(gcp-secret-store)"]
-            ES1["ExternalSecret: pgbouncer-certs"]
-            ES2["ExternalSecret: pgbouncer-secret"]
-            ES3["ExternalSecret: pgbouncer-config"]
-            
-            SS --> ES1
-            SS --> ES2
-            SS --> ES3
-            
-            ES1 & ES2 & ES3 -->|Secure Sync| SM
-        end
-
-        subgraph Secrets ["Kubernetes Secrets (Runtime Cache)"]
-            SecCerts["Secret: pgbouncer-certs<br>(server-ca.crt)"]
-            SecSecret["Secret: pgbouncer-secret<br>(userlist.txt)"]
-            SecConfig["Secret: pgbouncer-config<br>(pgbouncer.ini)"]
-            
-            ES1 -->|Generates| SecCerts
-            ES2 -->|Generates| SecSecret
-            ES3 -->|Generates| SecConfig
-        end
-
-        subgraph Deployment ["PgBouncer Deployment (2 Replicas)"]
-            SVC["Service: pgbouncer<br>(ClusterIP: 5432)"]
-            Pod1["PgBouncer Pod 1"]
-            Pod2["PgBouncer Pod 2"]
-            
-            SVC --> Pod1
-            SVC --> Pod2
-            
-            SecCerts -.->|Mount /etc/pgbouncer-certs| Pod1 & Pod2
-            SecSecret -.->|Mount /etc/pgbouncer-auth| Pod1 & Pod2
-            SecConfig -.->|Mount /etc/pgbouncer| Pod1 & Pod2
-        end
-
-        App["Application Pods"] -->|Internal Port 5432| SVC
-    end
-
-    Pod1 & Pod2 -->|Enforced TLS verify-ca| SQL
+    PB -.->|Mounts Config & Certs| Sec["🔑 K8s Secrets"]
+    ESO["⚙️ External Secrets Operator"] -->|Auto-Sync| Sec
+    ESO -->|Fetches| GSM["🛡️ GCP Secret Manager"]
 ```
 
 ---
@@ -76,6 +29,27 @@ graph TD
 - **Zero-Downtime Hot-Reload:** Safe, separate mounting directories allow updating configurations (`pgbouncer.ini` or `userlist.txt`) live without restarting active client connections.
 
 ---
+
+## Production-Grade Security & Durability
+
+This deployment is built for high reliability and follows strict enterprise security best practices:
+
+### 🛡️ Hardened Security Contexts
+- **Least Privilege (Non-Root):** Container execution runs under UID/GID `70` (`pgbouncer`), ensuring the process cannot gain root access on the host node.
+- **Read-Only Filesystem:** The root filesystem is mounted as read-only (`readOnlyRootFilesystem: true`), blocking runtime modifications to container binaries. Ephemeral run files are written to a secure memory-backed `emptyDir` volume (`/var/run/pgbouncer`).
+- **Privilege Escalation Blocked:** `allowPrivilegeEscalation: false` prevents child processes from gaining more privileges than their parent.
+- **System Call Restriction:** All Linux capabilities are dropped (`drop: - ALL`), and the standard `RuntimeDefault` seccomp profile is applied to restrict access to unsafe system calls.
+
+### 🔋 High Availability & Durability
+- **Pod Disruption Budget (PDB):** Guarded by a PDB requiring `minAvailable: 1`, ensuring that cluster upgrades or maintenance never take down both replicas simultaneously.
+- **Node Anti-Affinity:** Utilizes a soft `podAntiAffinity` spread rule (`topologyKey: kubernetes.io/hostname`) to prioritize distributing PgBouncer pods across separate GKE nodes, preventing a single hardware failure from causing a outage.
+- **Graceful Shutdown:** Configured with a `preStop` lifecycle hook sleep period of 180s, allowing active client queries to finish processing and GKE endpoints to propagate before termination.
+
+### 🐳 Parameterized Docker Builds
+- **Docker Build Arguments:** The `Dockerfile` compiles PgBouncer from source using `ARG PGBOUNCER_VERSION=1.25.2`. This decouples the compilation process, making base image updates and version bumps clean and modular.
+
+---
+
 
 ## Build and Deploy
 
