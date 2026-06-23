@@ -1,0 +1,151 @@
+# Pod Disruption Budget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pgbouncer-pdb
+  namespace: prod-hades
+  labels:
+    app: pgbouncer
+    env: prod
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: pgbouncer
+      env: prod
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgbouncer
+  namespace: prod-hades
+spec:
+  replicas: 2
+  revisionHistoryLimit: 6
+  minReadySeconds: 20
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 50%
+  selector:
+    matchLabels:
+      app: pgbouncer
+      env: prod
+  template:
+    metadata:
+      labels:
+        app: pgbouncer
+        env: prod
+    spec:
+      terminationGracePeriodSeconds: 200
+      nodeSelector:
+        env-pool: production-pool
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
+        seccompProfile:
+          type: RuntimeDefault
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - pgbouncer
+                    - key: env
+                      operator: In
+                      values:
+                        - prod
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: pgbouncer
+          image: asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgbouncer:v2
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5432
+              name: pgbouncer
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "2"
+              memory: "1200Mi"
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          startupProbe:
+            tcpSocket:
+              port: 5432
+            periodSeconds: 5
+            failureThreshold: 12 # Up to 60s for startup
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 8
+            periodSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          livenessProbe:
+            tcpSocket:
+              port: 5432
+            periodSeconds: 30
+            failureThreshold: 6
+            timeoutSeconds: 5
+          lifecycle: # zero-downtime GKE endpoint propagation sleep
+            preStop:
+              exec:
+                command: ["/bin/sleep", "180"]
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/pgbouncer
+              readOnly: true
+            - name: secret-volume
+              mountPath: /etc/pgbouncer-auth
+              readOnly: true
+            - name: certs-volume
+              mountPath: /etc/pgbouncer-certs
+              readOnly: true
+            - name: pgbouncer-run
+              mountPath: /var/run/pgbouncer
+      volumes:
+        - name: config-volume
+          secret:
+            secretName: pgbouncer-config
+        - name: secret-volume
+          secret:
+            secretName: pgbouncer-secret
+        - name: certs-volume
+          secret:
+            secretName: pgbouncer-certs
+        - name: pgbouncer-run
+          emptyDir: {}
+---
+# service
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgbouncer
+  namespace: prod-hades
+  labels:
+    app: pgbouncer
+    env: prod
+spec:
+  selector:
+    app: pgbouncer
+    env: prod
+  ports:
+    - port: 5432
+      protocol: TCP
+      targetPort: 5432
+  type: ClusterIP
