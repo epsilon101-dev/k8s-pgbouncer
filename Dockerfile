@@ -2,6 +2,7 @@
 FROM debian:bookworm-slim AS builder
 
 ARG PGBOUNCER_VERSION=1.25.2
+ARG PGBOUNCER_SHA256=924ad35113fd0a71c8e2dbe85b5d03445532e2b7b37a9f8a48983beea238b332
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -14,7 +15,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /build
 RUN curl -fsSL "https://www.pgbouncer.org/downloads/files/${PGBOUNCER_VERSION}/pgbouncer-${PGBOUNCER_VERSION}.tar.gz" \
-    | tar -xz --strip-components=1 \
+    -o pgbouncer.tar.gz \
+    && echo "${PGBOUNCER_SHA256}  pgbouncer.tar.gz" | sha256sum -c - \
+    && tar -xz --strip-components=1 -f pgbouncer.tar.gz \
+    && rm pgbouncer.tar.gz \
     && ./configure \
     --prefix=/usr/local \
     --with-openssl \
