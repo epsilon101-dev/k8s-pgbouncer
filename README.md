@@ -1,6 +1,6 @@
-# k8s-pgbouncer
+# Hardened & Highly-Available PgBouncer on GKE
 
-A hardened, highly-available, and modernized PgBouncer deployment for GKE utilizing GCP Secret Manager and the External Secrets Operator (ESO).
+A hardened, highly-available, and modernized **`PgBouncer`** deployment for GKE utilizing **`GCP Secret Manager`** and the **`External Secrets Operator (ESO)`**.
 
 ## Architecture Topology
 
