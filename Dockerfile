@@ -1,15 +1,46 @@
-# pgbouncer version : 1.13.0-r0 
-FROM alpine:3.12.0
+# syntax=docker/dockerfile:1.6
+FROM debian:bookworm-slim AS builder
 
-ENV UID=936 GID=936
+ARG PGBOUNCER_VERSION=1.25.2
 
-RUN apk -U --no-cache add \
-    pgbouncer \
-    tini \
-    su-exec
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    curl \
+    libevent-dev \
+    libssl-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY run.sh /usr/local/bin/run.sh
+WORKDIR /build
+RUN curl -fsSL "https://www.pgbouncer.org/downloads/files/${PGBOUNCER_VERSION}/pgbouncer-${PGBOUNCER_VERSION}.tar.gz" \
+    | tar -xz --strip-components=1 \
+    && ./configure \
+    --prefix=/usr/local \
+    --with-openssl \
+    --disable-debug \
+    && make -j"$(nproc)" \
+    && make install
 
-RUN chmod +x /usr/local/bin/run.sh
+# ── Runtime stage ──────────────────────────────────────────────
+FROM debian:bookworm-slim
 
-CMD ["run.sh"]
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libevent-2.1-7 \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r -g 70 pgbouncer \
+    && useradd -r -u 70 -g pgbouncer -d /var/lib/pgbouncer -s /sbin/nologin pgbouncer \
+    && mkdir -p /etc/pgbouncer /var/log/pgbouncer \
+    && chown -R pgbouncer:pgbouncer /etc/pgbouncer /var/log/pgbouncer \
+    && chmod 750 /etc/pgbouncer /var/log/pgbouncer
+#   ^ no /var/run here — let emptyDir handle it
+
+COPY --from=builder /usr/local/bin/pgbouncer /usr/local/bin/pgbouncer
+
+USER 70:70
+
+EXPOSE 5432
+
+ENTRYPOINT ["pgbouncer", "/etc/pgbouncer/pgbouncer.ini"]
