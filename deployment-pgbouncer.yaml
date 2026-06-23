@@ -120,8 +120,8 @@ spec:
               mountPath: /var/run/pgbouncer
       volumes:
         - name: config-volume
-          secret:
-            secretName: pgbouncer-config
+          configMap:
+            name: pgbouncer-config
         - name: secret-volume
           secret:
             secretName: pgbouncer-secret

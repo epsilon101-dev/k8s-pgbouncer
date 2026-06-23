@@ -39,6 +39,7 @@ This deployment is built for high reliability and follows strict enterprise secu
 - **Read-Only Filesystem:** The root filesystem is mounted as read-only (`readOnlyRootFilesystem: true`), blocking runtime modifications to container binaries. Ephemeral run files are written to a secure memory-backed `emptyDir` volume (`/var/run/pgbouncer`).
 - **Privilege Escalation Blocked:** `allowPrivilegeEscalation: false` prevents child processes from gaining more privileges than their parent.
 - **System Call Restriction:** All Linux capabilities are dropped (`drop: - ALL`), and the standard `RuntimeDefault` seccomp profile is applied to restrict access to unsafe system calls.
+- **SCRAM-SHA-256 Hashed Secrets:** To prevent storing plaintext database passwords in GKE's `etcd` or local secrets, this configuration enforces the use of pre-hashed PostgreSQL SCRAM verifiers in `userlist.txt`.
 
 ### 🔋 High Availability & Durability
 - **Pod Disruption Budget (PDB):** Guarded by a PDB requiring `minAvailable: 1`, ensuring that cluster upgrades or maintenance never take down both replicas simultaneously.
@@ -67,6 +68,16 @@ docker push asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgboun
 
 ### 2. Configure GCP Secret Manager (gcloud)
 
+> [!IMPORTANT]
+> **Production Password Security (SCRAM-SHA-256 Hashing):**
+> Storing raw plaintext passwords in Kubernetes Secrets is a security risk. Because this deployment configures `auth_type = scram-sha-256` in PgBouncer, you should store the pre-calculated PostgreSQL **SCRAM verifiers** (hashes) in GCP Secret Manager instead of raw plaintext passwords.
+> 
+> To retrieve the SCRAM verifier for your database user, run this query in your PostgreSQL database:
+> ```sql
+> SELECT passwd FROM pg_shadow WHERE usename = 'prod_backend_hades_user';
+> ```
+> This returns a string like `SCRAM-SHA-256$4096:base64salt$base64ClientKey:base64ServerKey`. Use this hashed verifier as the value for `db_password` in your Secret Manager JSON payload.
+
 Create the Google Service Account (GSA), download the database server CA certificate, construct the JSON payload, and create the secret:
 
 ```bash
@@ -87,8 +98,7 @@ python3 -c '
 import json
 ca_cert = open("server-ca.pem").read()
 payload = {
-    "db_ip": "10.100.1.5",
-    "db_password": "your-db-password",
+    "db_password": "your-db-scram-verifier",
     "server_ca": ca_cert
 }
 with open("pgbouncer_secrets_payload.json", "w") as f:
@@ -125,7 +135,10 @@ gcloud iam service-accounts add-iam-policy-binding prod-pgbouncer-gsa@your-gcp-p
   --member="serviceAccount:your-gcp-project-id.svc.id.goog[prod-hades/prod-pgbouncer-sa]" \
   --project=your-gcp-project-id
 
-# 2. Apply ServiceAccount, SecretStore, and ExternalSecrets (this generates all required K8s Secrets)
+# 2. Apply static ConfigMap first
+kubectl apply -f configmap-pgbouncer.yaml
+
+# 3. Apply ServiceAccount, SecretStore, and ExternalSecrets (this generates all required K8s Secrets)
 kubectl apply -f external-secret-pgbouncer.yaml
 
 # 5. Verify that Kubernetes Secrets are successfully synchronized by ESO
