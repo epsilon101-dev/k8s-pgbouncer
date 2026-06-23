@@ -119,21 +119,13 @@ Create the GKE Service Account, bind it to the GCP GSA, and deploy the manifests
 # Ensure you are operating in the correct GKE namespace
 kubectl config set-context --current --namespace=prod-hades
 
-# 1. Create Kubernetes Service Account (KSA) in GKE namespace
-kubectl create serviceaccount prod-pgbouncer-sa -n prod-hades
-
-# 2. Annotate GKE KSA with the GCP GSA email to link them
-kubectl annotate serviceaccount prod-pgbouncer-sa \
-  -n prod-hades \
-  iam.gke.io/gcp-service-account=prod-pgbouncer-gsa@your-gcp-project-id.iam.gserviceaccount.com
-
-# 3. Allow GKE KSA to impersonate GCP GSA (Workload Identity binding)
+# 1. Allow GKE KSA to impersonate GCP GSA (Workload Identity binding)
 gcloud iam service-accounts add-iam-policy-binding prod-pgbouncer-gsa@your-gcp-project-id.iam.gserviceaccount.com \
   --role="roles/iam.workloadIdentityUser" \
   --member="serviceAccount:your-gcp-project-id.svc.id.goog[prod-hades/prod-pgbouncer-sa]" \
   --project=your-gcp-project-id
 
-# 4. Apply SecretStore and ExternalSecrets (this generates all required K8s Secrets)
+# 2. Apply ServiceAccount, SecretStore, and ExternalSecrets (this generates all required K8s Secrets)
 kubectl apply -f external-secret-pgbouncer.yaml
 
 # 5. Verify that Kubernetes Secrets are successfully synchronized by ESO
