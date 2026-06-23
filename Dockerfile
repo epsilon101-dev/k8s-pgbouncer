@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.6
-FROM debian:bookworm-slim AS builder
+FROM debian:bookworm-slim@sha256:96e378d7e6531ac9a15ad505478fcc2e69f371b10f5cdf87857c4b8188404716 AS builder
 
 ARG PGBOUNCER_VERSION=1.25.2
 ARG PGBOUNCER_SHA256=924ad35113fd0a71c8e2dbe85b5d03445532e2b7b37a9f8a48983beea238b332
@@ -27,7 +27,7 @@ RUN curl -fsSL "https://www.pgbouncer.org/downloads/files/${PGBOUNCER_VERSION}/p
     && cp pgbouncer /usr/local/bin/pgbouncer
 
 # ── Runtime stage ──────────────────────────────────────────────
-FROM debian:bookworm-slim
+FROM debian:bookworm-slim@sha256:96e378d7e6531ac9a15ad505478fcc2e69f371b10f5cdf87857c4b8188404716
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
