@@ -81,9 +81,9 @@ docker inspect --format='{{index .RepoDigests 0}}' asia-southeast2-docker.pkg.de
 > 
 > To retrieve the SCRAM verifier for each database user, run this query in your PostgreSQL database:
 > ```sql
-> SELECT usename, passwd FROM pg_shadow WHERE usename IN ('prod_backend_hades_user', 'prod_backend_hades_abc');
+> SELECT usename, passwd FROM pg_shadow WHERE usename IN ('prod_backend_hades_user', 'prod_backend_hades_transaction');
 > ```
-> This returns the SCRAM verifiers (hashed strings starting with `SCRAM-SHA-256$...`) unique to each user. Save these verifiers under `db_password_user` and `db_password_abc` in your Secret Manager JSON payload.
+> This returns the SCRAM verifiers (hashed strings starting with `SCRAM-SHA-256$...`) unique to each user. Save these verifiers under `db_password_user` and `db_password_transaction` in your Secret Manager JSON payload.
 
 Create the Google Service Account (GSA), download the database server CA certificate, construct the JSON payload, and create the secret:
 
@@ -106,7 +106,7 @@ import json
 ca_cert = open("server-ca.pem").read()
 payload = {
     "db_password_user": "your-db-scram-verifier-for-user",
-    "db_password_abc": "your-db-scram-verifier-for-abc",
+    "db_password_transaction": "your-db-scram-verifier-for-transaction",
     "server_ca": ca_cert
 }
 with open("pgbouncer_secrets_payload.json", "w") as f:
