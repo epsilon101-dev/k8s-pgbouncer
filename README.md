@@ -48,7 +48,7 @@ This deployment is built for high reliability and follows strict enterprise secu
 
 ### 🐳 Parameterized & Secure Docker Builds
 - **Docker Build Arguments:** The `Dockerfile` compiles PgBouncer from source using `ARG PGBOUNCER_VERSION=1.25.2` and `ARG PGBOUNCER_SHA256`. This decouples the compilation process, making base image updates and version bumps clean and modular. Version details can be tracked in the official [PgBouncer Changelog](https://www.pgbouncer.org/changelog.html).
-- **Source Integrity Verification:** Enforces security at build-time by verifying the SHA-256 checksum of the downloaded PgBouncer source tarball (`sha256sum -c -`) before configuring and compiling. This prevents compilation of compromised or corrupted packages.
+- **Source Integrity Verification:** Enforces security at build-time by verifying the SHA-256 checksum of the downloaded PgBouncer source tarball (`sha256sum -c -`) before configuring and compiling. This prevents compilation of compromised or corrupted packages. You can verify and obtain the official checksums from the [PgBouncer Downloads Page](https://www.pgbouncer.org/downloads/).
 
 ---
 
@@ -210,4 +210,4 @@ This will trigger PgBouncer to re-read the configuration files from disk and app
 ## References
 
 - [Official PgBouncer Changelog](https://www.pgbouncer.org/changelog.html)
-- [Official PgBouncer Downloads](https://www.pgbouncer.org/downloads/)
+- [Official PgBouncer Downloads & SHA-256 Checksums](https://www.pgbouncer.org/downloads/)
