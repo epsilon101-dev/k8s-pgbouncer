@@ -8,7 +8,7 @@ The following diagram illustrates how credentials flow securely from Google Clou
 
 ```mermaid
 graph LR
-    App["🚀 Application Pods"] -->|TLS (Port 5432)| PB["🔒 PgBouncer (2 Replicas)"]
+    App["🚀 Application Pods"] -->|TLS Port 5432| PB["🔒 PgBouncer (2 Replicas)"]
     PB -->|TLS verify-ca| SQL["🗄️ Cloud SQL PostgreSQL"]
 
     PB -.->|Mounts Config and Certs| Sec["🔑 K8s Secrets"]
