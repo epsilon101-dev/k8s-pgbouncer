@@ -212,10 +212,14 @@ This will trigger PgBouncer to re-read the configuration files from disk and app
 
 ## References
 
-- [Official PgBouncer Changelog](https://www.pgbouncer.org/changelog.html)
+### ⚙️ General & Operations
 - [Official PgBouncer Downloads & SHA-256 Checksums](https://www.pgbouncer.org/downloads/)
+- [Official PgBouncer Changelog](https://www.pgbouncer.org/changelog.html)
 - [Kubernetes Pod Disruption Budgets (PDB)](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/#pod-disruption-budgets)
 - [Kubernetes Pod Affinity and Anti-Affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity)
-- [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+
+### 🛡️ Hardening & Security
+- [GKE Workload Identity Documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
+- [Kubernetes Pod & Container Security Contexts](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 - [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)
-- [Chainguard: Top 7 Docker Security Risks and Best Practices](https://www.chainguard.dev/supply-chain-security-101/top-7-docker-security-risks-and-best-practices)
+- [Chainguard Docker Security Best Practices](https://www.chainguard.dev/supply-chain-security-101/top-7-docker-security-risks-and-best-practices)
