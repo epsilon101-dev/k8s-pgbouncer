@@ -224,5 +224,7 @@ This will trigger PgBouncer to re-read the configuration files from disk and app
 - [External Secrets Operator (ESO)](https://docs.cloud.google.com/distributed-cloud/connected/latest/docs/external-secrets)
 - [Configure SSL/TLS on Cloud SQL PostgreSQL](https://docs.cloud.google.com/sql/docs/postgres/configure-ssl-instance)
 - [Kubernetes Pod & Container Security Contexts](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [Kubernetes RBAC Least Privilege Best Practices](https://snyk.io/blog/applying-the-principle-of-least-privilege-to-kubernetes-using-rbac/)
+- [GKE RBAC Authorization Best Practices](https://cloud.google.com/kubernetes-engine/docs/best-practices/rbac)
 - [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)
 - [Chainguard Docker Security Best Practices](https://www.chainguard.dev/supply-chain-security-101/top-7-docker-security-risks-and-best-practices)
