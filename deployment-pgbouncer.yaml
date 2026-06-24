@@ -156,12 +156,16 @@ metadata:
   labels:
     app: pgbouncer
     env: prod
+  annotations:
+    service.kubernetes.io/topology-mode: Auto # Optimize cross-zone routing to reduce latency and egress costs
 spec:
   selector:
     app: pgbouncer
     env: prod
   ports:
-    - port: 5432
+    - name: postgres
+      port: 5432
       protocol: TCP
       targetPort: 5432
+      appProtocol: postgresql # Help monitoring tools and service meshes identify DB traffic
   type: ClusterIP
