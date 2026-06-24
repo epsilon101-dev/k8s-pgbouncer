@@ -58,6 +58,10 @@ This deployment is built for high reliability and follows strict enterprise secu
 
 ## Build and Deploy
 
+> [!NOTE]
+> **Prerequisites & Security Status:**
+> This deployment guide assumes that the **External Secrets Operator (ESO)** is already installed in your Kubernetes cluster with a highly strict security configuration and fully audited **RBAC policies** to comply with the principle of least privilege.
+
 > [!TIP]
 > In a production environment, configuring and provisioning GCP infrastructure (Secret Manager, IAM Service Accounts, GKE Service Accounts, and IAM bindings) should be automated using **Terraform** or a similar Infrastructure-as-Code (IaC) tool. For simplicity in this tutorial, we use `gcloud` CLI commands.
 
