@@ -216,3 +216,4 @@ This will trigger PgBouncer to re-read the configuration files from disk and app
 - [Official PgBouncer Downloads & SHA-256 Checksums](https://www.pgbouncer.org/downloads/)
 - [Kubernetes Pod Disruption Budgets (PDB)](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/#pod-disruption-budgets)
 - [Kubernetes Pod Affinity and Anti-Affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity)
+- [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
