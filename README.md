@@ -41,7 +41,7 @@ This deployment is built for high reliability and follows strict enterprise secu
 - **Privilege Escalation Blocked:** `allowPrivilegeEscalation: false` prevents child processes from gaining more privileges than their parent.
 - **System Call Restriction:** All Linux capabilities are dropped (`drop: - ALL`), and the standard `RuntimeDefault` seccomp profile is applied to restrict access to unsafe system calls.
 - **Kernel Confinement (AppArmor):** Enforces an `appArmorProfile.type = RuntimeDefault` profile (Kubernetes 1.30+) to restrict file, network, and capability access at the OS kernel level.
-- **SCRAM-SHA-256 Hashed Secrets:** To prevent storing plaintext database passwords in GKE's `etcd` or local secrets, this configuration enforces the use of pre-hashed PostgreSQL SCRAM verifiers in `userlist.txt`.
+- **SCRAM-SHA-256 Hashed Secrets:** To prevent storing plaintext database passwords in GKE's `etcd` or Kubernetes secrets, this configuration enforces the use of pre-hashed PostgreSQL SCRAM verifiers in `userlist.txt`.
 - **Immutable Base Image Digests:** The builder and runtime base images are pinned using their SHA-256 digest (`debian:bookworm-slim@sha256:...`) to guarantee that GKE nodes and the build pipeline run the exact, untampered OS packages.
 
 ### 🔋 High Availability & Durability
