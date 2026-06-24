@@ -215,11 +215,14 @@ This will trigger PgBouncer to re-read the configuration files from disk and app
 ### ⚙️ General & Operations
 - [Official PgBouncer Downloads & SHA-256 Checksums](https://www.pgbouncer.org/downloads/)
 - [Official PgBouncer Changelog](https://www.pgbouncer.org/changelog.html)
-- [GKE Workload Identity Documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
 - [Kubernetes Pod Disruption Budgets (PDB)](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/#pod-disruption-budgets)
 - [Kubernetes Pod Affinity and Anti-Affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity)
 
 ### 🛡️ Hardening & Security
+- [GCP Secret Manager Overview](https://cloud.google.com/secret-manager/docs/overview)
+- [GKE Workload Identity Documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
+- [External Secrets Operator (ESO)](https://docs.cloud.google.com/distributed-cloud/connected/latest/docs/external-secrets)
+- [Configure SSL/TLS on Cloud SQL PostgreSQL](https://docs.cloud.google.com/sql/docs/postgres/configure-ssl-instance)
 - [Kubernetes Pod & Container Security Contexts](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 - [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)
 - [Chainguard Docker Security Best Practices](https://www.chainguard.dev/supply-chain-security-101/top-7-docker-security-risks-and-best-practices)
