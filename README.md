@@ -169,11 +169,11 @@ kubectl apply -f configmap-pgbouncer.yaml
 # 3. Apply ServiceAccount, SecretStore, and ExternalSecrets (this generates all required K8s Secrets)
 kubectl apply -f external-secret-pgbouncer.yaml
 
-# 5. Verify that Kubernetes Secrets are successfully synchronized by ESO
+# 4. Verify that Kubernetes Secrets are successfully synchronized by ESO
 # (Note: Workload Identity propagation can take 30-60s. If empty, wait a moment and retry)
 kubectl get secrets -n prod-hades
 
-# 6. Apply deployment, service, and PodDisruptionBudget
+# 5. Apply deployment, service, and PodDisruptionBudget
 kubectl apply -f deployment-pgbouncer.yaml
 ```
 
@@ -205,7 +205,7 @@ With **4 application users**, a `default_pool_size` of **40**, and **2 replicas*
    SHOW max_connections;
    ```
 2. **Leave Headroom:** Ensure the calculated maximum connections from PgBouncer are safely below your database's `max_connections`, leaving a margin (e.g., 20-30 connections) for direct administrator or analytics tool logins.
-3. **Adjust Config:** Tune `default_pool_size` in `external-secret-pgbouncer.yaml` accordingly before applying updates.
+3. **Adjust Config:** Tune `default_pool_size` in `configmap-pgbouncer.yaml` accordingly before applying updates.
 4. **Use Immutable Image Digests (Production):** Pin the container image by its SHA-256 digest (e.g., `pgbouncer@sha256:abc123yoursha...`) instead of mutable tags in `deployment-pgbouncer.yaml` to ensure reproducibility (see Step 1 for details).
 
 ---
