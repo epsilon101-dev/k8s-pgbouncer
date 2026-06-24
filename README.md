@@ -117,13 +117,13 @@ gcloud iam service-accounts create prod-pgbouncer-gsa \
 gcloud sql instances describe your-cloudsql-instance \
   --format="value(serverCaCert.cert)" > server-ca.pem
 
-# 3. Build JSON payload containing all sensitive PgBouncer configuration details
+# 3. Build JSON payload containing all sensitive PgBouncer configuration details (using SCRAM verifier hashes)
 python3 -c '
 import json
 ca_cert = open("server-ca.pem").read()
 payload = {
-    "db_password_user": "your-db-scram-verifier-for-user",
-    "db_password_transaction": "your-db-scram-verifier-for-transaction",
+    "db_password_user": "SCRAM-SHA-256$4096:your-db-scram-verifier-for-user",
+    "db_password_transaction": "SCRAM-SHA-256$4096:your-db-scram-verifier-for-transaction",
     "server_ca": ca_cert
 }
 with open("pgbouncer_secrets_payload.json", "w") as f:
