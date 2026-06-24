@@ -58,25 +58,24 @@ spec:
                         - prod
                 topologyKey: kubernetes.io/hostname # Defines the node domain boundary for spreading pods
       securityContext:
-        runAsNonRoot: true # Enforce container execution as non-root user
-        runAsUser: 70 # Run container process under UID 70 (pgbouncer)
-        runAsGroup: 70 # Run container process under GID 70 (pgbouncer)
-        fsGroup: 70 # Set GID 70 ownership for all volume mounts
+        runAsNonRoot: true # prevent root process execution
+        runAsUser: 70 # pgbouncer system user UID — non-privileged, no login shell
+        runAsGroup: 70 # pgbouncer system group GID
+        fsGroup: 70 # all volume mounts accessible only by pgbouncer group
         seccompProfile:
-          type: RuntimeDefault # Restrict system calls using container runtime default profile
+          type: RuntimeDefault # filter dangerous syscalls via runtime profile
         appArmorProfile:
-          type: RuntimeDefault # Confine container using container runtime default AppArmor profile
+          type: RuntimeDefault # restrict file, network, and capability access
       containers:
         - name: pgbouncer
-          # Use immutable image digest in production (e.g., pgbouncer@sha256:abc123yourdigest...)
-          # to ensure predictability and prevent tag overwriting.
+          # pinned to immutable digest — prevents mutable tag overwrite attacks
           image: asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgbouncer@sha256:your-pushed-image-sha256-digest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
               name: pgbouncer
           securityContext:
-            readOnlyRootFilesystem: true # Block runtime writes to the container's root file system
+            readOnlyRootFilesystem: true # block any runtime writes to the filesystem
             allowPrivilegeEscalation: false # Prevent child processes from gaining more privileges than parent
             capabilities:
               drop:
