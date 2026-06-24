@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.6
-# Builder stage
+# Builder stage - Pin to immutable base image digest for reproducibility
 FROM debian:bookworm-slim@sha256:96e378d7e6531ac9a15ad505478fcc2e69f371b10f5cdf87857c4b8188404716 AS builder
 
 ARG PGBOUNCER_VERSION=1.25.2
@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
+# Verify source tarball integrity using official SHA-256 checksum
 RUN curl -fsSL "https://www.pgbouncer.org/downloads/files/${PGBOUNCER_VERSION}/pgbouncer-${PGBOUNCER_VERSION}.tar.gz" \
     -o pgbouncer.tar.gz \
     && echo "${PGBOUNCER_SHA256}  pgbouncer.tar.gz" | sha256sum -c - \
@@ -27,9 +28,10 @@ RUN curl -fsSL "https://www.pgbouncer.org/downloads/files/${PGBOUNCER_VERSION}/p
     && make pgbouncer \
     && cp pgbouncer /usr/local/bin/pgbouncer
 
-# Runtime stage
+# Runtime stage - Pin to matching immutable base image digest
 FROM debian:bookworm-slim@sha256:96e378d7e6531ac9a15ad505478fcc2e69f371b10f5cdf87857c4b8188404716
 
+# Install minimal runtime dependencies only (--no-install-recommends)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     libevent-2.1-7 \
@@ -37,12 +39,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -r -g 70 pgbouncer \
-    # rejects shell access, using -s /sbin/nologin
+    # Create non-privileged pgbouncer user (UID 70) and block shell access
     && useradd -r -u 70 -g pgbouncer -d /var/lib/pgbouncer -s /sbin/nologin pgbouncer \
     && mkdir -p /etc/pgbouncer /var/log/pgbouncer \
+    # Restrict permissions: pgbouncer owner, read/write/execute for owner, read/execute for group, no access for others
     && chown -R pgbouncer:pgbouncer /etc/pgbouncer /var/log/pgbouncer \
     && chmod 750 /etc/pgbouncer /var/log/pgbouncer
-# ^ no /var/run here — let emptyDir handle it
+# ^ Avoid /var/run directory to allow write operations in read-only filesystems (handled by emptyDir)
 
 COPY --from=builder /usr/local/bin/pgbouncer /usr/local/bin/pgbouncer
 
