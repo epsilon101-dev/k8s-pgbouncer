@@ -217,3 +217,5 @@ This will trigger PgBouncer to re-read the configuration files from disk and app
 - [Kubernetes Pod Disruption Budgets (PDB)](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/#pod-disruption-budgets)
 - [Kubernetes Pod Affinity and Anti-Affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity)
 - [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)
+- [Chainguard: Top 7 Docker Security Risks and Best Practices](https://www.chainguard.dev/supply-chain-security-101/top-7-docker-security-risks-and-best-practices)
