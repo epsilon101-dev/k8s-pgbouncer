@@ -6,7 +6,8 @@ metadata:
 data:
   pgbouncer.ini: |
     [databases]
-    * = host=10.100.1.5 port=5432
+    * = host=10.206.144.9 port=5432
+
 
     [pgbouncer]
     logfile =
@@ -44,3 +45,9 @@ data:
     # TLS to CloudSQL
     server_tls_sslmode  = verify-ca
     server_tls_ca_file  = /etc/pgbouncer-certs/server-ca.crt
+
+    # Client TLS (incoming)
+    client_tls_sslmode = require
+    client_tls_cert_file = /var/run/pgbouncer/tls.crt
+    client_tls_key_file = /var/run/pgbouncer/tls.key
+
