@@ -89,7 +89,7 @@ docker inspect --format='{{index .RepoDigests 0}}' asia-southeast2-docker.pkg.de
 > 
 > To configure `scram-sha-256` authentication, you need the SCRAM verifiers (hashes starting with `SCRAM-SHA-256$...`) for your database users. 
 > 
-> Since managed databases like **GCP Cloud SQL** restrict read access to the `pg_shadow` system catalog (resulting in `permission denied for view pg_shadow` for non-superuser accounts), you can generate the SCRAM verifiers locally using Python instead of querying the database.
+> Since managed databases like **GCP Cloud SQL** restrict read access to the `pg_shadow` system catalog for all accounts (resulting in `permission denied for view pg_shadow` even for the default `postgres` admin account), you can generate the SCRAM verifiers locally using Python instead of querying the database.
 > 
 > Run the following command in your terminal, replacing `your-password-here` with the actual user password:
 > ```bash
