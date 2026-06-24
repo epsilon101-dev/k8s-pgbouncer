@@ -8,7 +8,7 @@ metadata:
     app: pgbouncer
     env: prod
 spec:
-  minAvailable: 1
+  minAvailable: 1 # Ensure at least one replica is always available during disruptions
   selector:
     matchLabels:
       app: pgbouncer
@@ -42,7 +42,7 @@ spec:
       nodeSelector:
         env-pool: production-pool # replace with gke pool node label
       affinity:
-        podAntiAffinity:
+        podAntiAffinity: # Soft rule: spreads replicas across different nodes, but allows running on a single NodePool VM if only one is available
           preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
               podAffinityTerm:
@@ -56,16 +56,16 @@ spec:
                       operator: In
                       values:
                         - prod
-                topologyKey: kubernetes.io/hostname
+                topologyKey: kubernetes.io/hostname # Defines the node domain boundary for spreading pods
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 70
-        runAsGroup: 70
-        fsGroup: 70
+        runAsNonRoot: true # Enforce container execution as non-root user
+        runAsUser: 70 # Run container process under UID 70 (pgbouncer)
+        runAsGroup: 70 # Run container process under GID 70 (pgbouncer)
+        fsGroup: 70 # Set GID 70 ownership for all volume mounts
         seccompProfile:
-          type: RuntimeDefault
+          type: RuntimeDefault # Restrict system calls using container runtime default profile
         appArmorProfile:
-          type: RuntimeDefault
+          type: RuntimeDefault # Confine container using container runtime default AppArmor profile
       containers:
         - name: pgbouncer
           # Use immutable image digest in production (e.g., pgbouncer@sha256:abc123yourdigest...)
@@ -76,11 +76,11 @@ spec:
             - containerPort: 5432
               name: pgbouncer
           securityContext:
-            readOnlyRootFilesystem: true
-            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true # Block runtime writes to the container's root file system
+            allowPrivilegeEscalation: false # Prevent child processes from gaining more privileges than parent
             capabilities:
               drop:
-                - ALL
+                - ALL # Drop all default Linux capabilities to restrict container OS privileges
           resources:
             requests:
               cpu: "250m"
