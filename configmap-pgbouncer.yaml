@@ -8,8 +8,6 @@ data:
     [databases]
     * = host=10.100.1.5 port=5432
 
-
-
     [pgbouncer]
     logfile =
     pidfile =
@@ -51,4 +49,3 @@ data:
     client_tls_sslmode = require
     client_tls_cert_file = /var/run/pgbouncer/tls.crt
     client_tls_key_file = /var/run/pgbouncer/tls.key
-
