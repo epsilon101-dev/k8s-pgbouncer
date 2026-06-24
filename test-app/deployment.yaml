@@ -6,7 +6,8 @@ metadata:
   labels:
     app: gin-client
 spec:
-  replicas: 1
+  replicas: 2
+
 
   selector:
     matchLabels:
@@ -17,7 +18,8 @@ spec:
         app: gin-client
     spec:
       nodeSelector:
-        env-pool: production-athena
+        env-pool: production-pool
+
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -39,7 +41,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: gin-client
-          image: asia-southeast2-docker.pkg.dev/flock-348606/athena/staging-athena/gin-pgbouncer-client@sha256:cab0622468c30b3c9b2d981f233645f0cdaa0a04091ed2bd741b9820b9750028
+          image: asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/gin-pgbouncer-client@sha256:your-pushed-image-sha256-digest
+
 
           imagePullPolicy: IfNotPresent
           ports:

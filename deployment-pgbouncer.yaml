@@ -20,7 +20,8 @@ metadata:
   name: pgbouncer
   namespace: prod-hades
 spec:
-  replicas: 1
+  replicas: 2
+
 
   revisionHistoryLimit: 6
   minReadySeconds: 20
@@ -41,7 +42,8 @@ spec:
     spec:
       terminationGracePeriodSeconds: 200
       nodeSelector:
-        env-pool: production-athena # replace with gke pool node label
+        env-pool: production-pool # replace with gke pool node label
+
 
       affinity:
         podAntiAffinity: # Soft rule: spreads replicas across different nodes, but allows running on a single NodePool VM if only one is available
@@ -84,7 +86,8 @@ spec:
       containers:
         - name: pgbouncer
           # pinned to immutable digest — prevents mutable tag overwrite attacks
-          image: asia-southeast2-docker.pkg.dev/flock-348606/athena/staging-athena/pgbouncer@sha256:7752c194697934d256724e352bb8f0426d686d1e316acbf97a77b8bc0296824d
+          image: asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgbouncer@sha256:your-pushed-image-sha256-digest
+
 
           command:
             - sh

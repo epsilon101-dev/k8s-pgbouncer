@@ -6,7 +6,8 @@ metadata:
 data:
   pgbouncer.ini: |
     [databases]
-    * = host=10.206.144.9 port=5432
+    * = host=10.100.1.5 port=5432
+
 
 
     [pgbouncer]
