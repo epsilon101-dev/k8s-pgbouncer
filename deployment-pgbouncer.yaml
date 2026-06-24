@@ -124,16 +124,16 @@ spec:
                 command: ["/bin/sleep", "180"]
           volumeMounts:
             - name: config-volume
-              mountPath: /etc/pgbouncer
+              mountPath: /etc/pgbouncer # static configuration files (pgbouncer.ini)
               readOnly: true
             - name: secret-volume
-              mountPath: /etc/pgbouncer-auth
+              mountPath: /etc/pgbouncer-auth # dynamic secrets and user list (userlist.txt)
               readOnly: true
             - name: certs-volume
-              mountPath: /etc/pgbouncer-certs
+              mountPath: /etc/pgbouncer-certs # database TLS root certs (server-ca.crt)
               readOnly: true
             - name: pgbouncer-run
-              mountPath: /var/run/pgbouncer
+              mountPath: /var/run/pgbouncer # ephemeral directory for unix sockets and runtime pids
       volumes:
         - name: config-volume
           configMap:
