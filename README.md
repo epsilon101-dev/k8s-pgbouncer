@@ -23,10 +23,11 @@ graph LR
 - **Zero Secrets in Git:** Sensitive configuration details (passwords, server CA certificates, and target host IPs) are managed securely in GCP Secret Manager.
 - **Automated Sync with ESO:** The External Secrets Operator maps Secret Manager properties directly to native Kubernetes Secrets in the GKE cluster.
 - **Workload Identity Integration:** Access to GCP Secret Manager is restricted to the specific GKE Service Account (`prod-pgbouncer-sa`) using GCP IAM and Workload Identity (no hardcoded GCP keys).
-- **Secure Runtime Contexts:** Pods run as non-root (UID/GID `70`), enforce a read-only root filesystem, drop all Linux capabilities, and implement a `RuntimeDefault` seccomp profile.
+- **Secure Runtime Contexts:** Pods run as non-root (UID/GID `70`), enforce a read-only root filesystem, drop all Linux capabilities, and implement `RuntimeDefault` seccomp and AppArmor profiles (Kubernetes 1.30+).
 - **High Availability & Anti-Affinity:** Scaled to **2 replicas** with a `PodDisruptionBudget` (`minAvailable: 1`) and soft Pod Anti-Affinity rules to distribute pods across separate VMs.
 - **Enforced Backend TLS:** Configured with `server_tls_sslmode = verify-ca`, requiring PgBouncer to validate the Cloud SQL instance certificate against the official server CA file.
 - **Zero-Downtime Hot-Reload:** Safe, separate mounting directories allow updating configurations (`pgbouncer.ini` or `userlist.txt`) live without restarting active client connections.
+- **Immutable Base Images:** Compiles and runs inside Docker containers pinned to immutable base image digests (`debian:bookworm-slim@sha256:...`) to prevent supply chain tag-poisoning attacks.
 
 ---
 
@@ -39,7 +40,9 @@ This deployment is built for high reliability and follows strict enterprise secu
 - **Read-Only Filesystem:** The root filesystem is mounted as read-only (`readOnlyRootFilesystem: true`), blocking runtime modifications to container binaries. Ephemeral run files are written to a secure memory-backed `emptyDir` volume (`/var/run/pgbouncer`).
 - **Privilege Escalation Blocked:** `allowPrivilegeEscalation: false` prevents child processes from gaining more privileges than their parent.
 - **System Call Restriction:** All Linux capabilities are dropped (`drop: - ALL`), and the standard `RuntimeDefault` seccomp profile is applied to restrict access to unsafe system calls.
+- **Kernel Confinement (AppArmor):** Enforces an `appArmorProfile.type = RuntimeDefault` profile (Kubernetes 1.30+) to restrict file, network, and capability access at the OS kernel level.
 - **SCRAM-SHA-256 Hashed Secrets:** To prevent storing plaintext database passwords in GKE's `etcd` or local secrets, this configuration enforces the use of pre-hashed PostgreSQL SCRAM verifiers in `userlist.txt`.
+- **Immutable Base Image Digests:** The builder and runtime base images are pinned using their SHA-256 digest (`debian:bookworm-slim@sha256:...`) to guarantee that GKE nodes and the build pipeline run the exact, untampered OS packages.
 
 ### 🔋 High Availability & Durability
 - **Pod Disruption Budget (PDB):** Guarded by a PDB requiring `minAvailable: 1`, ensuring that cluster upgrades or maintenance never take down both replicas simultaneously.
