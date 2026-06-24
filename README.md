@@ -214,3 +214,4 @@ This will trigger PgBouncer to re-read the configuration files from disk and app
 
 - [Official PgBouncer Changelog](https://www.pgbouncer.org/changelog.html)
 - [Official PgBouncer Downloads & SHA-256 Checksums](https://www.pgbouncer.org/downloads/)
+- [Kubernetes Pod Disruption Budgets (PDB)](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/#pod-disruption-budgets)
