@@ -8,7 +8,7 @@ The following diagram illustrates how credentials flow securely from Google Clou
 
 ```mermaid
 graph LR
-    App["🚀 Application Pods"] -->|TLS Port 5432| PB["🔒 PgBouncer (2 Replicas)"]
+    App["🚀 Application Pods"] -->|Port 5432| PB["🔒 PgBouncer (2 Replicas)"]
     PB -->|TLS verify-ca| SQL["🗄️ Cloud SQL PostgreSQL"]
 
     PB -.->|Mounts Config and Certs| Sec["🔑 K8s Secrets"]
@@ -44,26 +44,10 @@ This deployment is built for high reliability and follows strict enterprise secu
 - **SCRAM-SHA-256 Hashed Secrets:** To prevent storing plaintext database passwords in GKE's `etcd` or local secrets, this configuration enforces the use of pre-hashed PostgreSQL SCRAM verifiers in `userlist.txt`.
 - **Immutable Base Image Digests:** The builder and runtime base images are pinned using their SHA-256 digest (`debian:bookworm-slim@sha256:...`) to guarantee that GKE nodes and the build pipeline run the exact, untampered OS packages.
 
-### 🔒 Koneksi TLS End-to-End
-
-This deployment enforces end-to-end transit encryption to secure database traffic across all connection segments:
-
-1. **Client to PgBouncer (Client-side TLS):**
-   Connections from applications (clients) to PgBouncer are encrypted using SSL/TLS. This is enforced by configuring the client connection parameters (e.g., `sslmode=require` or `sslmode=verify-full`) and setting up the corresponding client TLS settings on PgBouncer, ensuring all client-side traffic is encrypted.
-
-2. **PgBouncer to Cloud SQL (Backend-side TLS):**
-   Connections from PgBouncer to the backend Cloud SQL PostgreSQL instance are fully encrypted and verified using a custom Certificate Authority (CA) certificate to prevent Man-in-the-Middle (MitM) attacks. This is configured in `pgbouncer.ini` via the following parameters:
-   ```ini
-   # TLS to CloudSQL
-   server_tls_sslmode  = verify-ca
-   server_tls_ca_file  = /etc/pgbouncer-certs/server-ca.crt
-   ```
-
 ### 🔋 High Availability & Durability
 - **Pod Disruption Budget (PDB):** Guarded by a PDB requiring `minAvailable: 1`, ensuring that cluster upgrades or maintenance never take down both replicas simultaneously.
 - **Node Anti-Affinity:** Utilizes a soft `podAntiAffinity` spread rule (`topologyKey: kubernetes.io/hostname`) to prioritize distributing PgBouncer pods across separate GKE nodes, preventing a single hardware failure from causing a outage.
 - **Graceful Shutdown:** Configured with a `preStop` lifecycle hook sleep period of 180s, allowing active client queries to finish processing and GKE endpoints to propagate before termination.
-
 
 ### 🐳 Parameterized & Secure Docker Builds
 - **Docker Build Arguments:** The `Dockerfile` compiles PgBouncer from source using `ARG PGBOUNCER_VERSION=1.25.2` and `ARG PGBOUNCER_SHA256`. This decouples the compilation process, making base image updates and version bumps clean and modular. Version details can be tracked in the official [PgBouncer Changelog](https://www.pgbouncer.org/changelog.html).
