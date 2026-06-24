@@ -21,13 +21,15 @@ metadata:
   namespace: prod-hades
 spec:
   replicas: 2
+
+
   revisionHistoryLimit: 6
   minReadySeconds: 20
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
-      maxSurge: 50%
+      maxSurge: 1
   selector:
     matchLabels:
       app: pgbouncer
@@ -41,6 +43,8 @@ spec:
       terminationGracePeriodSeconds: 200
       nodeSelector:
         env-pool: production-pool # replace with gke pool node label
+
+
       affinity:
         podAntiAffinity: # Soft rule: spreads replicas across different nodes, but allows running on a single NodePool VM if only one is available
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -83,7 +87,16 @@ spec:
         - name: pgbouncer
           # pinned to immutable digest — prevents mutable tag overwrite attacks
           image: asia-southeast2-docker.pkg.dev/your-gcp-project-id/hades/prod/pgbouncer@sha256:your-pushed-image-sha256-digest
+
+
+          command:
+            - sh
+            - -c
+            - |
+              openssl req -x509 -newkey rsa:2048 -nodes -keyout /var/run/pgbouncer/tls.key -out /var/run/pgbouncer/tls.crt -days 3650 -subj "/CN=pgbouncer" && \
+              exec pgbouncer /etc/pgbouncer/pgbouncer.ini
           imagePullPolicy: IfNotPresent
+
           ports:
             - containerPort: 5432
               name: pgbouncer
