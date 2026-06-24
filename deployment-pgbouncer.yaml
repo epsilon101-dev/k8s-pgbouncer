@@ -57,6 +57,19 @@ spec:
                       values:
                         - prod
                 topologyKey: kubernetes.io/hostname # Defines the node domain boundary for spreading pods
+          # Strict / Hard rule: forces replicas to run on separate nodes (pod scheduling will block if only 1 VM exists)
+          # requiredDuringSchedulingIgnoredDuringExecution:
+          #   - labelSelector:
+          #       matchExpressions:
+          #         - key: app
+          #           operator: In
+          #           values:
+          #             - pgbouncer
+          #         - key: env
+          #           operator: In
+          #           values:
+          #             - prod
+          #     topologyKey: kubernetes.io/hostname
       securityContext:
         runAsNonRoot: true # prevent root process execution
         runAsUser: 70 # pgbouncer system user UID — non-privileged, no login shell
