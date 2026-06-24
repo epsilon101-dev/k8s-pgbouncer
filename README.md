@@ -87,11 +87,15 @@ docker inspect --format='{{index .RepoDigests 0}}' asia-southeast2-docker.pkg.de
 > **Production Password Security (SCRAM-SHA-256 Hashing):**
 > Storing raw plaintext passwords in Kubernetes Secrets is a security risk. Because this deployment configures `auth_type = scram-sha-256` in PgBouncer, you should store the pre-calculated PostgreSQL **SCRAM verifiers** (hashes) in GCP Secret Manager instead of raw plaintext passwords.
 > 
-> To retrieve the SCRAM verifier for each database user, run this query in your PostgreSQL database:
-> ```sql
-> SELECT usename, passwd FROM pg_shadow WHERE usename IN ('prod_backend_hades_user', 'prod_backend_hades_transaction');
+> To configure `scram-sha-256` authentication, you need the SCRAM verifiers (hashes starting with `SCRAM-SHA-256$...`) for your database users. 
+> 
+> Since managed databases like **GCP Cloud SQL** restrict read access to the `pg_shadow` system catalog (resulting in `permission denied for view pg_shadow` for non-superuser accounts), you can generate the SCRAM verifiers locally using Python instead of querying the database.
+> 
+> Run the following command in your terminal, replacing `your-password-here` with the actual user password:
+> ```bash
+> python3 -c "import os, base64, hashlib, hmac; pwd = b'your-password-here'; salt = os.urandom(16); sp = hashlib.pbkdf2_hmac('sha256', pwd, salt, 4096); ck = hmac.new(sp, b'Client Key', hashlib.sha256).digest(); sk = hmac.new(sp, b'Server Key', hashlib.sha256).digest(); stk = hashlib.sha256(ck).digest(); print(f'SCRAM-SHA-256\$4096:{base64.b64encode(salt).decode()}\${base64.b64encode(stk).decode()}:{base64.b64encode(sk).decode()}')"
 > ```
-> This returns the SCRAM verifiers (hashed strings starting with `SCRAM-SHA-256$...`) unique to each user. Save these verifiers under `db_password_user` and `db_password_transaction` in your Secret Manager JSON payload.
+> Save the generated verifiers under `db_password_user` and `db_password_transaction` in your Secret Manager JSON payload.
 >
 > [!IMPORTANT]
 > **Separation of Credentials (Least Privilege):**
