@@ -1,6 +1,6 @@
 # Hardened & Highly-Available PgBouncer on GKE
 
-A production-grade **`PgBouncer`** deployment for GKE with zero secrets in Git, **`Workload Identity Federation`**, **`External Secrets Operator (ESO)`**, **`SCRAM-SHA-256`** authentication, enforced TLS to Cloud SQL, verified supply chain integrity, and a fully hardened runtime security context.
+A production-grade **`PgBouncer`** deployment for GKE with zero secrets in Git, **`Workload Identity Federation`**, **`External Secrets Operator (ESO) for GCP Secret Manager`**, **`SCRAM-SHA-256`** authentication, enforced TLS to Cloud SQL, verified supply chain integrity, and a fully hardened runtime security context.
 
 ## Architecture Topology
 
