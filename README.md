@@ -92,6 +92,11 @@ docker inspect --format='{{index .RepoDigests 0}}' asia-southeast2-docker.pkg.de
 > SELECT usename, passwd FROM pg_shadow WHERE usename IN ('prod_backend_hades_user', 'prod_backend_hades_transaction');
 > ```
 > This returns the SCRAM verifiers (hashed strings starting with `SCRAM-SHA-256$...`) unique to each user. Save these verifiers under `db_password_user` and `db_password_transaction` in your Secret Manager JSON payload.
+>
+> [!IMPORTANT]
+> **Separation of Credentials (Least Privilege):**
+> * **PgBouncer's Secret (`prod-pgbouncer-secrets`):** Stores only the **SCRAM verifiers** (hashes) for authentication. PgBouncer uses these to populate `userlist.txt` and verify client handshakes.
+> * **Client Applications:** Must use the corresponding **plaintext passwords** (stored in a separate, application-specific Secret) to connect to PgBouncer. Do not configure client applications to read from PgBouncer's secret, as they require the raw password to compute the client-side SCRAM handshake.
 
 Create the Google Service Account (GSA), download the database server CA certificate, construct the JSON payload, and create the secret:
 
@@ -207,7 +212,7 @@ To apply changes to `pgbouncer.ini` or `userlist.txt` dynamically without any do
 
 ```bash
 # Send SIGHUP signal to the pgbouncer process
-kubectl exec -it -n prod-hades deployment/pgbouncer -- kill -HUP 1
+kubectl exec -it -n prod-hades deployment/pgbouncer -- sh -c "kill -HUP 1"
 ```
 
 This will trigger PgBouncer to re-read the configuration files from disk and apply the changes in memory instantly, without dropping any active client connections.
