@@ -95,6 +95,9 @@ docker inspect --format='{{index .RepoDigests 0}}' asia-southeast2-docker.pkg.de
 > ```bash
 > python3 -c "import os, base64, hashlib, hmac; pwd = b'your-password-here'; salt = os.urandom(16); sp = hashlib.pbkdf2_hmac('sha256', pwd, salt, 4096); ck = hmac.new(sp, b'Client Key', hashlib.sha256).digest(); sk = hmac.new(sp, b'Server Key', hashlib.sha256).digest(); stk = hashlib.sha256(ck).digest(); print(f'SCRAM-SHA-256\$4096:{base64.b64encode(salt).decode()}\${base64.b64encode(stk).decode()}:{base64.b64encode(sk).decode()}')"
 > ```
+> This will output a valid SCRAM-SHA-256 verifier, for example:
+> `SCRAM-SHA-256$4096:JgExJO4vIVzTa/8Z82cyXQ==$RFfvT0fzv+Lai3x6CNoUi0Hl4Z9PXazH29Awcrgk8T4=:Dp+J9TfyqsHavkXM99kDcaCbjQFAzayb1jPXle2oIic=`
+> 
 > Save the generated verifiers under `db_password_user` and `db_password_transaction` in your Secret Manager JSON payload.
 >
 > [!IMPORTANT]
